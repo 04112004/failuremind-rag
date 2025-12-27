@@ -1,0 +1,53 @@
+[
+  {
+    "cause_id": "C-201",
+    "failure_id": "F-101",
+    "root_cause": "Silent data drift",
+    "why": "Training data distribution changed over time without drift monitoring",
+    "signals": [
+      "Slow accuracy decay",
+      "Stable training loss",
+      "No alert triggered"
+    ]
+  },
+  {
+    "cause_id": "C-202",
+    "failure_id": "F-102",
+    "root_cause": "Schema mismatch",
+    "why": "Upstream data source changed column order",
+    "signals": [
+      "No ingestion failure",
+      "Unexpected feature statistics"
+    ]
+  },
+  {
+    "cause_id": "C-203",
+    "failure_id": "F-103",
+    "root_cause": "Resource under-provisioning",
+    "why": "Larger model deployed without increasing compute resources",
+    "signals": [
+      "Increased response time",
+      "High CPU utilization"
+    ]
+  },
+  {
+    "cause_id": "C-204",
+    "failure_id": "F-104",
+    "root_cause": "Environmental drift",
+    "why": "Lighting conditions changed compared to training data",
+    "signals": [
+      "Lower confidence scores",
+      "Increased false negatives"
+    ]
+  },
+  {
+    "cause_id": "C-205",
+    "failure_id": "F-105",
+    "root_cause": "Suboptimal text chunking",
+    "why": "Chunks were too large and lacked semantic boundaries",
+    "signals": [
+      "Low similarity scores",
+      "Inconsistent answers"
+    ]
+  }
+]
