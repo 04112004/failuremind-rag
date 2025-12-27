@@ -11,16 +11,13 @@ venv/
 .git
 .gitignore
 
-# Vector DB & data (should NOT be baked into image)
+# Vector DB & data
 vectorstore/
 data/
+
+# Frontend
+frontend/
 
 # Tests & docs
 tests/
 README.md
-
-# Frontend (if not needed in backend image)
-frontend/
-
-# OS files
-.DS_Store
