@@ -9,35 +9,13 @@ llm = ChatGroq(
     temperature=0
 )
 
-# Load retrievers once (safe)
-retrievers = load_retrievers()
-
-
 def run_rag(question: str):
+    retrievers = load_retrievers()
+
     contexts = []
-
-    # Collect context safely
-    for name, r in retrievers.items():
-        if r is None:
-            continue
-        try:
-            docs = r.invoke(question)
-            contexts.extend([d.page_content for d in docs])
-        except Exception as e:
-            print(f"[WARN] Retriever '{name}' failed:", e)
-
-    # If no knowledge available
-    if not contexts:
-        return {
-            "risk_level": "UNKNOWN",
-            "risk_score": 0.0,
-            "likely_failure": "Knowledge base not initialized",
-            "evidence": [],
-            "recommended_actions": [
-                "Upload vectorstore",
-                "Rebuild embeddings"
-            ]
-        }
+    for r in retrievers.values():
+        docs = r.invoke(question)
+        contexts.extend([d.page_content for d in docs])
 
     prompt = RISK_PROMPT.format(
         context="\n".join(contexts),
@@ -51,12 +29,12 @@ def run_rag(question: str):
         parsed = json.loads(raw)
     except json.JSONDecodeError:
         parsed = {
+            "risk_level": "MEDIUM",
             "likely_failure": "Uncertain system behavior",
             "evidence": contexts[:3],
             "recommended_actions": ["Add monitoring", "Improve validation"]
         }
 
-    # Compute risk score
     risk_score = compute_risk_score(contexts, parsed)
 
     if risk_score >= 0.7:
@@ -70,3 +48,4 @@ def run_rag(question: str):
     parsed["risk_score"] = risk_score
 
     return parsed
+
