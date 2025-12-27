@@ -10,7 +10,19 @@ llm = ChatGroq(
     temperature=0
 )
 
-retrievers = load_retrievers()
+from app.retrievers import load_retrievers
+
+def run_rag(question: str):
+    retrievers = load_retrievers()
+
+    if retrievers["failures"] is None:
+        return {
+            "risk": "UNKNOWN",
+            "reason": "Vector store not initialized yet"
+        }
+
+    # normal RAG logic here
+
 
 
 def run_rag(question: str):
