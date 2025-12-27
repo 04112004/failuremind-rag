@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.env
+
+# Git
+.git
+.gitignore
+
+# Vector DB & data (should NOT be baked into image)
+vectorstore/
+data/
+
+# Tests & docs
+tests/
+README.md
+
+# Frontend (if not needed in backend image)
+frontend/
+
+# OS files
+.DS_Store
