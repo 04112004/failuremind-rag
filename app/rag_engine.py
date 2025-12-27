@@ -13,9 +13,22 @@ def run_rag(question: str):
     retrievers = load_retrievers()
 
     contexts = []
-    for r in retrievers.values():
+
+    for name, r in retrievers.items():
+        if r is None:
+            continue   # ✅ CRITICAL FIX
         docs = r.invoke(question)
         contexts.extend([d.page_content for d in docs])
+
+    # If no context at all → graceful fallback
+    if not contexts:
+        return {
+            "risk_level": "UNKNOWN",
+            "risk_score": 0.0,
+            "likely_failure": "Knowledge base not initialized",
+            "evidence": [],
+            "recommended_actions": ["Upload data and rebuild vector store"]
+        }
 
     prompt = RISK_PROMPT.format(
         context="\n".join(contexts),
@@ -48,4 +61,6 @@ def run_rag(question: str):
     parsed["risk_score"] = risk_score
 
     return parsed
+
+
 
