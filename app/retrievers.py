@@ -4,7 +4,9 @@ from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -13,11 +15,14 @@ def load_docs(filename):
     with open(path, "r") as f:
         data = json.load(f)
 
-    return [Document(page_content=item["text"]) for item in data]
+    # data is a list of strings
+    return [Document(page_content=item) for item in data]
 
 def build_retriever(filename):
     docs = load_docs(filename)
-    return FAISS.from_documents(docs, embeddings).as_retriever(search_kwargs={"k": 2})
+    return FAISS.from_documents(docs, embeddings).as_retriever(
+        search_kwargs={"k": 2}
+    )
 
 def load_retrievers():
     return {
@@ -25,3 +30,4 @@ def load_retrievers():
         "causes": build_retriever("root_causes.json"),
         "fixes": build_retriever("fixes.json"),
     }
+
