@@ -1,7 +1,7 @@
 import json
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.schema import Document
+from langchain_core.documents import Document
 from app.config import EMBED_MODEL
 
 embeddings = HuggingFaceEmbeddings(model_name=EMBED_MODEL)
