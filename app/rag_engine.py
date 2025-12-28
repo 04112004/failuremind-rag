@@ -9,26 +9,14 @@ llm = ChatGroq(
     temperature=0
 )
 
-def run_rag(question: str):
-    retrievers = load_retrievers()
+retrievers = load_retrievers()
 
+def run_rag(question: str):
     contexts = []
 
-    for name, r in retrievers.items():
-        if r is None:
-            continue   # ✅ CRITICAL FIX
+    for r in retrievers.values():
         docs = r.invoke(question)
         contexts.extend([d.page_content for d in docs])
-
-    # If no context at all → graceful fallback
-    if not contexts:
-        return {
-            "risk_level": "UNKNOWN",
-            "risk_score": 0.0,
-            "likely_failure": "Knowledge base not initialized",
-            "evidence": [],
-            "recommended_actions": ["Upload data and rebuild vector store"]
-        }
 
     prompt = RISK_PROMPT.format(
         context="\n".join(contexts),
@@ -40,9 +28,8 @@ def run_rag(question: str):
 
     try:
         parsed = json.loads(raw)
-    except json.JSONDecodeError:
+    except Exception:
         parsed = {
-            "risk_level": "MEDIUM",
             "likely_failure": "Uncertain system behavior",
             "evidence": contexts[:3],
             "recommended_actions": ["Add monitoring", "Improve validation"]
@@ -50,17 +37,11 @@ def run_rag(question: str):
 
     risk_score = compute_risk_score(contexts, parsed)
 
-    if risk_score >= 0.7:
-        level = "HIGH"
-    elif risk_score >= 0.4:
-        level = "MEDIUM"
-    else:
-        level = "LOW"
-
-    parsed["risk_level"] = level
+    parsed["risk_level"] = (
+        "HIGH" if risk_score >= 0.7
+        else "MEDIUM" if risk_score >= 0.4
+        else "LOW"
+    )
     parsed["risk_score"] = risk_score
 
     return parsed
-
-
-

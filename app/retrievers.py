@@ -1,29 +1,25 @@
-import os
+import json
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
-from app.config import VECTOR_DIR, EMBED_MODEL
+from langchain.schema import Document
+from app.config import EMBED_MODEL
 
 embeddings = HuggingFaceEmbeddings(model_name=EMBED_MODEL)
 
-def safe_load(name: str):
-    path = os.path.join(VECTOR_DIR, name)
-    if not os.path.exists(path):
-        print(f"[WARN] Vectorstore missing: {path}")
-        return None
+def load_docs(path):
+    with open(path, "r") as f:
+        data = json.load(f)
+    return [Document(page_content=item) for item in data]
 
-    try:
-        return FAISS.load_local(
-            path,
-            embeddings,
-            allow_dangerous_deserialization=True
-        ).as_retriever(search_kwargs={"k": 2})
-    except Exception as e:
-        print(f"[ERROR] Failed loading {name}: {e}")
-        return None
+def build_retriever(json_path):
+    docs = load_docs(json_path)
+    store = FAISS.from_documents(docs, embeddings)
+    return store.as_retriever(search_kwargs={"k": 2})
 
 def load_retrievers():
     return {
-        "failures": safe_load("failures"),
-        "causes": safe_load("causes"),
-        "fixes": safe_load("fixes"),
+        "failures": build_retriever("data/failures.json"),
+        "causes": build_retriever("data/root_causes.json"),
+        "fixes": build_retriever("data/fixes.json"),
     }
+
