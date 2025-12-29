@@ -1,33 +1,32 @@
-import os
 import json
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-BASE_DIR = os.path.dirname(__file__)
 
-def load_docs(filename):
-    path = os.path.join(BASE_DIR, "data", filename)
+def load_docs(path: str):
     with open(path, "r") as f:
         data = json.load(f)
 
-    # data is a list of strings
-    return [Document(page_content=item) for item in data]
+    docs = []
+    for item in data:
+        docs.append(Document(page_content=item))
+    return docs
 
-def build_retriever(filename):
-    docs = load_docs(filename)
-    return FAISS.from_documents(docs, embeddings).as_retriever(
-        search_kwargs={"k": 2}
-    )
+
+def build_retriever(json_path: str):
+    docs = load_docs(json_path)
+    embeddings = HuggingFaceEmbeddings(model_name=EMBED_MODEL)
+
+    store = FAISS.from_documents(docs, embeddings)
+    return store.as_retriever(search_kwargs={"k": 3})
+
 
 def load_retrievers():
     return {
-        "failures": build_retriever("failures.json"),
-        "causes": build_retriever("root_causes.json"),
-        "fixes": build_retriever("fixes.json"),
+        "failures": build_retriever("app/data/failures.json"),
+        "causes": build_retriever("app/data/root_causes.json"),
+        "fixes": build_retriever("app/data/fixes.json"),
     }
-

@@ -10,3 +10,4 @@ app = FastAPI(title="FailureMind")
 @app.post("/analyze", response_model=RiskAnalysis)
 def analyze(query: RiskQuery):
     return run_rag(query.question)
+
